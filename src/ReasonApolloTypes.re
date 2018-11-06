@@ -86,6 +86,12 @@ type subscriptionResponse('a) =
   | Error(apolloError)
   | Data('a);
 
+
+type executionResponse('a) =
+  | Errors(array(graphqlError))
+  | EmptyResponse
+  | Data('a);
+
 /* 
  apollo link ws
  */
