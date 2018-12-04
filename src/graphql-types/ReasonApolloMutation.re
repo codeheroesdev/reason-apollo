@@ -84,8 +84,7 @@ module MutationFactory = (Config: Config) => {
 
   let make =
       (
-        ~update:
-           option((ApolloClient.generatedApolloClient, updateProps) => unit)=?,
+        ~update: option(('a, updateProps) => unit)=?,
         ~variables: option(Js.Json.t)=?,
         ~onError: option(unit => unit)=?,
         ~onCompleted: option(unit => unit)=?,
