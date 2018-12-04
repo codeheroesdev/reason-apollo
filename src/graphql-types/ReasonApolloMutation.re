@@ -80,7 +80,7 @@ module MutationFactory = (Config: Config) => {
     | (None, None) => EmptyResponse
     };
 
-  type updateProps = {data: option(Config.t)};
+  type updateProps = {. "data": option(Config.t)};
 
   let make =
       (
