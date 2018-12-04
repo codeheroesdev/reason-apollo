@@ -80,8 +80,12 @@ module MutationFactory = (Config: Config) => {
     | (None, None) => EmptyResponse
     };
 
+  type updateProps = {data: option(Config.t)};
+
   let make =
       (
+        ~update:
+           option((ApolloClient.generatedApolloClient, updateProps) => unit)=?,
         ~variables: option(Js.Json.t)=?,
         ~onError: option(unit => unit)=?,
         ~onCompleted: option(unit => unit)=?,
@@ -91,6 +95,7 @@ module MutationFactory = (Config: Config) => {
       ~reactClass=mutationComponent,
       ~props=
         Js.Nullable.{
+          "update": update |> fromOption,
           "mutation": graphqlMutationAST,
           "variables": variables |> fromOption,
           "onError": onError |> fromOption,
