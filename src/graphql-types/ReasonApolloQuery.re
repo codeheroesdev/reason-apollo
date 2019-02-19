@@ -46,7 +46,7 @@ type renderPropObjJS = {
   networkStatus: int,
   variables: Js.Null_undefined.t(Js.Json.t),
   fetchMore: fetchMoreOptions => Js.Promise.t(unit),
-  subscribeToMore: (subscribeToMoreOptions, unit) => unit,
+  subscribeToMore: subscribeToMoreOptions => (. unit) => unit,
 };
 
 module Get = (Config: ReasonApolloTypes.Config) => {
@@ -71,10 +71,9 @@ module Get = (Config: ReasonApolloTypes.Config) => {
         ~variables: Js.Json.t=?,
         ~updateQuery: updateQuerySubscriptionT=?,
         ~onError: onErrorT=?,
-        unit,
         unit
       ) =>
-      unit,
+      (. unit) => unit,
   };
 
   let graphqlQueryAST = gql(. Config.query);
