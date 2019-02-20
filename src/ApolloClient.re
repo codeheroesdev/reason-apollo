@@ -23,22 +23,20 @@ type generatedApolloClient = {
   "resetStore": [@bs.meth] (unit => unit),
 };
 
-type fetch;
-
-type linkOptions = {
+type linkOptions('fetch) = {
   .
   "uri": string,
   "includeExtensions": Js.Nullable.t(bool),
-  "fetch": Js.Nullable.t(fetch),
+  "fetch": Js.Nullable.t('fetch),
   "headers": Js.Nullable.t(Js.Json.t),
   "credentials": Js.Nullable.t(string),
   "fetchOptions": Js.Nullable.t(Js.Json.t),
 };
 
-type uploadLinkOptions = {
+type uploadLinkOptions('fetch) = {
   .
   "uri": Js.Nullable.t(string),
-  "fetch": Js.Nullable.t(fetch),
+  "fetch": Js.Nullable.t('fetch),
   "fetchOptions": Js.Nullable.t(Js.t({.})),
   "credentials": Js.Nullable.t(string),
   "headers": Js.Nullable.t(Js.Json.t),

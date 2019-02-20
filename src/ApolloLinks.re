@@ -11,7 +11,8 @@ external split: (splitTest => bool, apolloLink, apolloLink) => apolloLink =
 
 /* Bind the HttpLink class */
 [@bs.module "apollo-link-http"] [@bs.new]
-external createHttpLink: ApolloClient.linkOptions => apolloLink = "HttpLink";
+external createHttpLink: ApolloClient.linkOptions('fetch) => apolloLink =
+  "HttpLink";
 
 /* Bind the setContext method */
 [@bs.module "apollo-link-context"]
@@ -34,7 +35,8 @@ external webSocketLink: webSocketLinkT => apolloLink = "WebSocketLink";
 
 /* Bind createUploadLink function from apollo upload link */
 [@bs.module "apollo-upload-client"]
-external createUploadLink: ApolloClient.uploadLinkOptions => apolloLink =
+external createUploadLink:
+  ApolloClient.uploadLinkOptions('fetch) => apolloLink =
   "createUploadLink";
 
 let webSocketLink = (~uri, ~reconnect=?, ()) =>
