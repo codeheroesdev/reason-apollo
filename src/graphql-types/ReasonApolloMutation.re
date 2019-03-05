@@ -6,11 +6,11 @@ type renderPropObjJS = {
   "called": bool,
   "data": Js.Nullable.t(Js.Json.t),
   "error": Js.Nullable.t(apolloError),
-  "networkStatus": int,
+  "networkStatus": Js.Nullable.t(int),
   "variables": Js.Null_undefined.t(Js.Json.t),
 };
 
-module MutationFactory = (Config: Config) => {
+module Make = (Config: Config) => {
   external cast:
     string =>
     {
@@ -29,19 +29,50 @@ module MutationFactory = (Config: Config) => {
     data: option(Config.t),
     loading: bool,
     error: option(apolloError),
-    networkStatus: int,
+    networkStatus: option(int),
   };
   type apolloMutation =
-    (~variables: Js.Json.t=?, ~refetchQueries: array(string)=?, unit) =>
-    Js.Promise.t(executionResult);
+    (
+      ~variables: Js.Json.t=?,
+      ~refetchQueries: array(string)=?,
+      ~optimisticResponse: Config.t=?,
+      unit
+    ) =>
+    Js.Promise.t(executionResponse(Config.t));
 
   [@bs.obj]
   external makeMutateParams:
-    (~variables: Js.Json.t=?, ~refetchQueries: array(string)=?) => _ =
+    (
+      ~variables: Js.Json.t=?,
+      ~refetchQueries: array(string)=?,
+      ~optimisticResponse: Config.t=?
+    ) =>
+    _ =
     "";
+
+  let convertExecutionResultToReason = (executionResult: executionResult) =>
+    switch (
+      executionResult##data |> ReasonApolloUtils.getNonEmptyObj,
+      executionResult##errors |> Js.Nullable.toOption,
+    ) {
+    | (Some(data), _) => Data(Config.parse(data))
+    | (_, Some(errors)) => Errors(errors)
+    | (None, None) => EmptyResponse
+    };
   let apolloMutationFactory =
-      (~jsMutation, ~variables=?, ~refetchQueries=?, ()) =>
-    jsMutation(makeMutateParams(~variables?, ~refetchQueries?));
+      (
+        ~jsMutation,
+        ~variables=?,
+        ~refetchQueries=?,
+        ~optimisticResponse=?,
+        (),
+      ) =>
+    jsMutation(
+      makeMutateParams(~variables?, ~refetchQueries?, ~optimisticResponse?),
+    )
+    |> Js.Promise.(
+         then_(response => resolve(convertExecutionResultToReason(response)))
+       );
   let apolloDataToReason: renderPropObjJS => response =
     apolloData =>
       switch (
@@ -67,7 +98,7 @@ module MutationFactory = (Config: Config) => {
       },
     error: apolloData##error |> Js.Nullable.toOption,
     loading: apolloData##loading,
-    networkStatus: apolloData##networkStatus,
+    networkStatus: apolloData##networkStatus->Js.Nullable.toOption,
   };
 
   let convertExecutionResultToReason = (executionResult: executionResult) =>

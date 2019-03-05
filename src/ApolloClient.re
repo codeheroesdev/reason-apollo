@@ -20,7 +20,7 @@ type generatedApolloClient = {
     [@bs.meth] (
       mutationObj => Js.Promise.t(ReasonApolloMutation.renderPropObjJS)
     ),
-  "resetStore": [@bs.meth] (unit => unit),
+  "resetStore": [@bs.meth] (unit => Js.Promise.t(unit)),
 };
 
 type linkOptions('fetch) = {
@@ -59,28 +59,6 @@ external apolloClientObjectParam:
   _ =
   "";
 
-module WriteQuery = (Config: Config) => {
-  [@bs.module] external gql: ReasonApolloTypes.gql = "graphql-tag";
-  type writeQueryOptions = {
-    .
-    "query": ReasonApolloTypes.queryString,
-    "variables": Js.Nullable.t(Js.Json.t),
-    "data": Config.t,
-  };
-  [@bs.send]
-  external writeQuery: (generatedApolloClient, writeQueryOptions) => unit = "";
-  let graphqlQueryAST = gql(. Config.query);
-  let make = (~client, ~variables: option(Js.Json.t)=?, ~data: Config.t, ()) =>
-    writeQuery(
-      client,
-      {
-        "query": graphqlQueryAST,
-        "variables": Js.Nullable.fromOption(variables),
-        "data": data,
-      },
-    );
-};
-
 module ReadQuery = (Config: ReasonApolloTypes.Config) => {
   [@bs.module] external gql: ReasonApolloTypes.gql = "graphql-tag";
   type readQueryOptions = {
@@ -93,10 +71,12 @@ module ReadQuery = (Config: ReasonApolloTypes.Config) => {
   external readQuery:
     (generatedApolloClient, readQueryOptions) => Js.Nullable.t(Js.Json.t) =
     "";
+
   let graphqlQueryAST = gql(. Config.query);
   let apolloDataToRecord: Js.Nullable.t(Js.Json.t) => response =
     apolloData =>
       Js.Nullable.toOption(apolloData)->(Belt.Option.map(Config.parse));
+
   let make = (~client, ~variables: option(Js.Json.t)=?, ()) =>
     readQuery(
       client,
@@ -106,4 +86,28 @@ module ReadQuery = (Config: ReasonApolloTypes.Config) => {
       },
     )
     ->apolloDataToRecord;
+};
+
+module WriteQuery = (Config: ReasonApolloTypes.Config) => {
+  [@bs.module] external gql: ReasonApolloTypes.gql = "graphql-tag";
+  type writeQueryOptions = {
+    .
+    "query": ReasonApolloTypes.queryString,
+    "variables": Js.Nullable.t(Js.Json.t),
+    "data": Config.t,
+  };
+  [@bs.send]
+  external writeQuery: (generatedApolloClient, writeQueryOptions) => unit = "";
+
+  let graphqlQueryAST = gql(. Config.query);
+
+  let make = (~client, ~variables: option(Js.Json.t)=?, ~data: Config.t, ()) =>
+    writeQuery(
+      client,
+      {
+        "query": graphqlQueryAST,
+        "variables": Js.Nullable.fromOption(variables),
+        "data": data,
+      },
+    );
 };

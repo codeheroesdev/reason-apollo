@@ -28,18 +28,18 @@ let createApolloClient =
  * Expose a module to perform "query" operations for the given client
  */
 module CreateQuery = (Config: ReasonApolloTypes.Config) =>
-  ReasonApolloQuery.Get(Config);
+  ReasonApolloQuery.Make(Config);
 
 /*
  * Expose a module to perform "mutation" operations for the given client
  */
 module CreateMutation = (Config: ReasonApolloTypes.Config) =>
-  ReasonApolloMutation.MutationFactory(Config);
+  ReasonApolloMutation.Make(Config);
 /*
  * Expose a module to perform "subscription" operations for the given client
  */
 module CreateSubscription = (Config: ReasonApolloTypes.Config) =>
-  ReasonApolloSubscription.Get(Config);
+  ReasonApolloSubscription.Make(Config);
 
 module Provider = ApolloProvider;
 

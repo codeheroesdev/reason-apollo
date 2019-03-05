@@ -1,6 +1,6 @@
 open ReasonApolloTypes;
 
-module Get = (Config: ReasonApolloTypes.Config) => {
+module Make = (Config: ReasonApolloTypes.Config) => {
   [@bs.module] external gql: ReasonApolloTypes.gql = "graphql-tag";
   [@bs.module "react-apollo"]
   external subscriptionComponent: ReasonReact.reactClass = "Subscription";
@@ -64,7 +64,7 @@ module Get = (Config: ReasonApolloTypes.Config) => {
   let make =
       (
         ~variables: option(Js.Json.t)=?,
-        ~children: renderPropObj => ReasonReact.reactElement,
+        children: renderPropObj => ReasonReact.reactElement,
       ) =>
     ReasonReact.wrapJsForReason(
       ~reactClass=subscriptionComponent,

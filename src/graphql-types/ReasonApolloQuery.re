@@ -43,13 +43,13 @@ type renderPropObjJS = {
   data: Js.Nullable.t(Js.Json.t),
   error: Js.Nullable.t(apolloError),
   refetch: Js.Null_undefined.t(Js.Json.t) => Js.Promise.t(renderPropObjJS),
-  networkStatus: int,
+  networkStatus: Js.Nullable.t(int),
   variables: Js.Null_undefined.t(Js.Json.t),
   fetchMore: fetchMoreOptions => Js.Promise.t(unit),
   subscribeToMore: subscribeToMoreOptions => (. unit) => unit,
 };
 
-module Get = (Config: ReasonApolloTypes.Config) => {
+module Make = (Config: ReasonApolloTypes.Config) => {
   [@bs.module] external gql: ReasonApolloTypes.gql = "graphql-tag";
   [@bs.module "react-apollo"]
   external queryComponent: ReasonReact.reactClass = "Query";
@@ -64,7 +64,7 @@ module Get = (Config: ReasonApolloTypes.Config) => {
     fetchMore:
       (~variables: Js.Json.t=?, ~updateQuery: updateQueryT, unit) =>
       Js.Promise.t(unit),
-    networkStatus: int,
+    networkStatus: option(int),
     subscribeToMore:
       (
         ~document: queryString,
@@ -118,23 +118,25 @@ module Get = (Config: ReasonApolloTypes.Config) => {
            data |> apolloDataToVariant |> Js.Promise.resolve
          ),
     fetchMore: (~variables=?, ~updateQuery, ()) =>
-      apolloData
-      ->(fetchMoreGet(fetchMoreOptions(~variables?, ~updateQuery, ()))),
-    networkStatus: apolloData->networkStatusGet,
+      apolloData->(
+                    fetchMoreGet(
+                      fetchMoreOptions(~variables?, ~updateQuery, ()),
+                    )
+                  ),
+    networkStatus: apolloData->networkStatusGet->Js.Nullable.toOption,
     subscribeToMore:
       (~document, ~variables=?, ~updateQuery=?, ~onError=?, ()) =>
-      apolloData
-      ->(
-          subscribeToMoreGet(
-            subscribeToMoreOptions(
-              ~document,
-              ~variables?,
-              ~updateQuery?,
-              ~onError?,
-              (),
-            ),
-          )
-        ),
+      apolloData->(
+                    subscribeToMoreGet(
+                      subscribeToMoreOptions(
+                        ~document,
+                        ~variables?,
+                        ~updateQuery?,
+                        ~onError?,
+                        (),
+                      ),
+                    )
+                  ),
   };
 
   let make =
@@ -146,6 +148,10 @@ module Get = (Config: ReasonApolloTypes.Config) => {
         ~errorPolicy: option(string)=?,
         ~ssr: option(bool)=?,
         ~displayName: option(string)=?,
+        ~skip: option(bool)=?,
+        ~onCompleted: option(Js.Nullable.t(Js.Json.t) => unit)=?,
+        ~onError: option(apolloError => unit)=?,
+        ~partialRefetch: option(bool)=?,
         ~delay: option(bool)=?,
         ~context: option(Js.Json.t)=?,
         children: renderPropObj => ReasonReact.reactElement,
@@ -163,6 +169,10 @@ module Get = (Config: ReasonApolloTypes.Config) => {
           "errorPolicy": errorPolicy |> fromOption,
           "ssr": ssr |> fromOption,
           "displayName": displayName |> fromOption,
+          "skip": skip |> fromOption,
+          "onCompleted": onCompleted |> fromOption,
+          "onError": onError |> fromOption,
+          "partialRefetch": partialRefetch |> fromOption,
           "delay": delay |> fromOption,
           "context": context |> fromOption,
         },
