@@ -22,7 +22,7 @@ external apolloLinkSetContext: (unit => Js.t({..})) => apolloLink =
 /* Bind the setContext method */
 [@bs.module "apollo-link-context"]
 external apolloLinkAsyncSetContext:
-  (unit => Js.Promise.t(Js.t({..}))) => apolloLink =
+  ('request => Js.Promise.t(Js.t({..}))) => apolloLink =
   "setContext";
 
 /* Bind the onError method */
