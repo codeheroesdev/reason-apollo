@@ -1,7 +1,7 @@
 open ReasonApolloTypes;
 
 module Make = (Config: ReasonApolloTypes.Config) => {
-  [@bs.module "grapql-tag"] external gql: ReasonApolloTypes.gql = "default";
+  [@bs.module "graphql-tag"] external gql: ReasonApolloTypes.gql = "default";
   [@bs.module "react-apollo"]
   external subscriptionComponent: ReasonReact.reactClass = "Subscription";
 
